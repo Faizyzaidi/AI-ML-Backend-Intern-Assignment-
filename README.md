@@ -8,6 +8,8 @@ summary at the end.
 
 Built for the PGAGI AI/ML & Backend Intern Assignment.
 
+**Developed by:** [faizyzaidi](https://github.com/faizyzaidi)
+
 ---
 
 ## 1. Quick Start
@@ -277,5 +279,15 @@ documented list. Nothing is hardcoded.
   link rather than `sessionStorage`.
 - Multi-role sessions / role-switching mid-interview.
 - Re-ranking retrieved chunks with a cross-encoder before generation.
+
+---
+
+## Author
+
+This project was developed by **faizyzaidi** as part of the PGAGI AI/ML &
+Backend Intern Assignment.
+
+- GitHub: [@faizyzaidi](https://github.com/faizyzaidi)
+
 # AI-ML-Backend-Intern-Assignment-
 # AI-ML-Backend-Intern-Assignment-
