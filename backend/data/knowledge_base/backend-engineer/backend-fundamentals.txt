@@ -1,0 +1,31 @@
+REST API Design Principles
+
+A well-designed REST API exposes resources through predictable URLs and uses HTTP methods semantically: GET for retrieval, POST for creation, PUT/PATCH for updates, and DELETE for removal. Idempotency matters: GET, PUT, and DELETE should be safe to retry without unintended side effects, while POST typically is not. Status codes should communicate outcome precisely: 200 for success, 201 for resource creation, 400 for client errors, 401/403 for authentication/authorization failures, 404 for missing resources, and 500 for unexpected server errors. Versioning strategies (URL path, header, or query parameter) help evolve an API without breaking existing clients.
+
+Database Indexing and Query Performance
+
+An index is a data structure that improves the speed of data retrieval at the cost of additional writes and storage. B-tree indexes are the default in most relational databases and work well for equality and range queries on ordered data. Composite indexes should be ordered by selectivity and query pattern: columns used in equality filters generally come before columns used in range filters. Over-indexing can slow down writes significantly, since every insert/update must maintain all indexes on a table. The query planner uses statistics about data distribution to decide whether to use an index or perform a full table scan; stale statistics can lead to poor query plans.
+
+Caching Strategies
+
+Caching reduces latency and database load by storing frequently accessed data closer to where it's needed. Cache-aside (lazy loading) checks the cache first, falling back to the database and populating the cache on a miss. Write-through caching updates the cache and database together, ensuring consistency at the cost of write latency. Cache invalidation is famously one of the hardest problems in computer science: strategies include time-based expiration (TTL), explicit invalidation on writes, and versioned cache keys. Distributed caches like Redis or Memcached introduce their own consistency and failover considerations in a multi-node deployment.
+
+Microservices vs Monoliths
+
+A monolithic architecture deploys the entire application as a single unit, which simplifies development, testing, and deployment early on, but can become difficult to scale and maintain as the codebase and team grow. Microservices decompose an application into independently deployable services organized around business capabilities, enabling independent scaling and technology choices per service, at the cost of increased operational complexity: service discovery, distributed tracing, network latency between services, and eventual consistency across service boundaries all become concerns that don't exist in a monolith. The choice between them should be driven by team size, domain complexity, and operational maturity rather than by trend.
+
+Authentication and Authorization
+
+Authentication verifies who a user is; authorization determines what they're allowed to do. Common authentication mechanisms include session-based auth (server-side session state with a cookie), token-based auth (JWTs signed and verified without server-side session storage), and OAuth2/OpenID Connect for delegated authorization and federated identity. JWTs should be short-lived and paired with a refresh token mechanism, since a compromised long-lived JWT cannot be revoked without additional infrastructure (e.g., a token blocklist). Authorization models range from simple role-based access control (RBAC) to fine-grained attribute-based access control (ABAC) for complex permission requirements.
+
+Asynchronous Processing and Message Queues
+
+Long-running or resource-intensive tasks (sending emails, processing images, generating reports) should generally be offloaded from the request/response cycle to background workers via a message queue such as RabbitMQ, Kafka, or a managed equivalent. This improves perceived latency for the end user and allows the system to handle load spikes by buffering work rather than dropping requests. Message queues introduce delivery semantics considerations: at-most-once, at-least-once, and exactly-once delivery each come with different trade-offs, and consumers should generally be designed to be idempotent to safely handle at-least-once delivery, which is the most common guarantee in practice.
+
+Database Transactions and ACID Properties
+
+A transaction groups multiple operations into a single unit of work that either fully succeeds or fully fails. ACID stands for Atomicity, Consistency, Isolation, and Durability. Isolation levels (read uncommitted, read committed, repeatable read, serializable) trade off consistency guarantees against concurrency and performance; higher isolation levels reduce anomalies like dirty reads, non-repeatable reads, and phantom reads, but increase locking and reduce throughput under contention. Distributed transactions across microservices are notoriously difficult; patterns like the Saga pattern (a sequence of local transactions with compensating actions) are often used instead of two-phase commit.
+
+API Rate Limiting and Throttling
+
+Rate limiting protects a backend service from being overwhelmed by too many requests, whether from abusive clients, buggy integrations, or legitimate traffic spikes. Common algorithms include the token bucket (allows bursts up to a bucket size, refilling at a steady rate) and the sliding window log/counter. Rate limits are typically applied per API key, per user, or per IP address, and should return a 429 Too Many Requests status with a Retry-After header so well-behaved clients can back off appropriately.
